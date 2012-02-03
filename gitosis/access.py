@@ -36,6 +36,11 @@ def haveAccess(config, user, mode, path):
         ))
 
     basename, ext = os.path.splitext(path)
+    try:
+        username, reponame = basename.split('/')
+    except:
+        username = None
+        reponame = None
     if ext == '.git':
         log.debug(
             'Stripping .git suffix from %(path)r, new value %(basename)r'
@@ -58,8 +63,18 @@ def haveAccess(config, user, mode, path):
             repos = repos.split()
 
         mapping = None
-
-        if pathMatchPatterns(path, repos):
+        
+        # match for unknown repository
+        if user == username:
+            log.debug(
+                'Access ok as owner for %(user)r as %(mode)r on %(path)r'
+                % dict(
+                user=user,
+                mode=mode,
+                path=path,
+                ))
+            mapping = path
+        elif pathMatchPatterns(path, repos):
             log.debug(
                 'Access ok for %(user)r as %(mode)r on %(path)r'
                 % dict(
